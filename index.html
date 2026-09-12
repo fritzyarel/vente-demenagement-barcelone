@@ -294,6 +294,10 @@
     opacity: 0.75;
   }
 
+  .status-chips {
+    margin-top: 10px;
+  }
+
   .sortsel {
     font: inherit;
     font-size: 0.82rem;
@@ -704,6 +708,12 @@
         <option value="price-asc">Prix croissant</option>
         <option value="price-desc">Prix d&eacute;croissant</option>
       </select>
+    </div>
+    <div class="chips status-chips" id="statusChipRow">
+      <button class="chip is-active" type="button" data-filter-status="all">Tous <span class="chip-count">48</span></button>
+      <button class="chip" type="button" data-filter-status="available">Disponible <span class="chip-count">24</span></button>
+      <button class="chip" type="button" data-filter-status="reserve">R&eacute;serv&eacute; <span class="chip-count">7</span></button>
+      <button class="chip" type="button" data-filter-status="vendu">Vendu <span class="chip-count">17</span></button>
     </div>
     <p class="result-line"><strong id="resultCount">48</strong> objets affich&eacute;s</p>
   </div>
@@ -1757,18 +1767,22 @@
 
   var searchInput = document.getElementById('searchInput');
   var chipRow = document.getElementById('chipRow');
+  var statusChipRow = document.getElementById('statusChipRow');
   var sortSel = document.getElementById('sortSel');
   var resultCount = document.getElementById('resultCount');
   var emptyState = document.getElementById('emptyState');
   var activeCat = 'all';
+  var activeStatus = 'all';
 
   function applyFilters() {
     var q = searchInput.value.trim().toLowerCase();
     var visible = 0;
     cards.forEach(function (c) {
+      var cardStatus = c.dataset.status || 'available';
       var matchesCat = activeCat === 'all' || c.dataset.category === activeCat;
+      var matchesStatus = activeStatus === 'all' || cardStatus === activeStatus;
       var matchesQuery = !q || c.dataset.title.indexOf(q) !== -1;
-      var show = matchesCat && matchesQuery;
+      var show = matchesCat && matchesStatus && matchesQuery;
       c.classList.toggle('is-hidden', !show);
       if (show) visible++;
     });
@@ -1798,6 +1812,15 @@
     chipRow.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('is-active'); });
     btn.classList.add('is-active');
     activeCat = btn.dataset.filterCat;
+    applyFilters();
+  });
+
+  statusChipRow.addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    statusChipRow.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('is-active'); });
+    btn.classList.add('is-active');
+    activeStatus = btn.dataset.filterStatus;
     applyFilters();
   });
 
